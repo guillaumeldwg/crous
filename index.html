@@ -128,7 +128,6 @@
             margin-bottom: 20px;
         }
 
-        /* --- STYLES POUR LE PAD DE SIGNATURE --- */
         .signature-pad-container {
             margin-top: 20px;
             display: flex;
@@ -163,6 +162,7 @@
             cursor: crosshair;
             margin-bottom: 15px;
             touch-action: none;
+            display: block;
         }
 
         button {
@@ -297,101 +297,98 @@
             <div class="signatures-box">
                 <span class="sig-titre">Espace réservé aux Signatures et Paraphes</span>
                 
-                <!-- ZONE DE DESSIN -->
                 <div class="signature-pad-container">
                     <div class="signature-controls">
                         <input type="text" id="signer-name" placeholder="Inscrivez votre Nom / Prénom" autocomplete="off">
                     </div>
                     <span style="font-style: italic; font-size: 11pt; margin-bottom: 8px;">Apposez votre signature ci-dessous (souris ou doigt) :</span>
-                    <canvas id="signature-canvas" width="400" height="150"></canvas>
+                    <canvas id="signature-canvas" width="380" height="140"></canvas>
                     <div class="signature-controls">
                         <button type="button" id="btn-clear">Nettoyer le parchemin</button>
                         <button type="button" id="btn-save">Ratifier la convention</button>
                     </div>
                 </div>
 
-                <!-- ZONE D'AFFICHAGE DES SIGNATURES SAUVEGARDÉES -->
                 <div class="saved-signatures" id="saved-signatures"></div>
             </div>
         </div>
     </div>
 
-    <!-- Supabase JS Client -->
+    <!-- Script CDN Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- SCRIPT DE GESTION DES SIGNATURES AVEC BASE EN LIGNE -->
     <script>
-        const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        document.addEventListener("DOMContentLoaded", function() {
+        // Initialisation immédiate du canvas indépendamment du réseau
+        (function() {
             const canvas = document.getElementById('signature-canvas');
             const ctx = canvas.getContext('2d');
             let isDrawing = false;
+            let hasDrawn = false;
 
-            // Style de la plume
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.strokeStyle = '#2c1e16';
 
-            // Adaptation pour le tactile
-            function getCoordinates(e) {
-                let rect = canvas.getBoundingClientRect();
-                if (e.touches && e.touches.length > 0) {
-                    return {
-                        x: e.touches[0].clientX - rect.left,
-                        y: e.touches[0].clientY - rect.top
-                    };
-                }
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 return {
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top
+                    x: (clientX - rect.left) * (canvas.width / rect.width),
+                    y: (clientY - rect.top) * (canvas.height / rect.height)
                 };
             }
 
-            function startPosition(e) {
+            function startDraw(e) {
                 isDrawing = true;
-                draw(e);
-            }
-
-            function endPosition() {
-                isDrawing = false;
+                hasDrawn = true;
+                const pos = getPos(e);
                 ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
             }
 
-            function draw(e) {
+            function moveDraw(e) {
                 if (!isDrawing) return;
-                e.preventDefault();
-
-                let coords = getCoordinates(e);
-                ctx.lineTo(coords.x, coords.y);
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
                 ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(coords.x, coords.y);
+                if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
             }
 
-            // Événements Souris
-            canvas.addEventListener('mousedown', startPosition);
-            canvas.addEventListener('mouseup', endPosition);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseleave', endPosition);
+            function stopDraw() {
+                isDrawing = false;
+            }
 
-            // Événements Tactiles
-            canvas.addEventListener('touchstart', startPosition, { passive: false });
-            canvas.addEventListener('touchend', endPosition);
-            canvas.addEventListener('touchmove', draw, { passive: false });
+            // Souris
+            canvas.addEventListener('mousedown', startDraw);
+            window.addEventListener('mousemove', moveDraw);
+            window.addEventListener('mouseup', stopDraw);
 
-            // Bouton Effacer
+            // Tactile (mobile)
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', moveDraw, { passive: false });
+            window.addEventListener('touchend', stopDraw);
+
+            // Bouton effacer
             document.getElementById('btn-clear').addEventListener('click', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasDrawn = false;
             });
 
-            // Affichage dans le parchemin
+            // Gestion Supabase
+            const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
+            const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
+            let supabase = null;
+
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+
             function renderSignatures(sigs) {
                 const container = document.getElementById('saved-signatures');
                 container.innerHTML = '';
-                
                 sigs.forEach(sig => {
                     const div = document.createElement('div');
                     div.className = 'signature-item';
@@ -405,38 +402,37 @@
                 });
             }
 
-            // Récupération initiale depuis Supabase
             async function fetchSignatures() {
-                const { data, error } = await supabase
-                    .from('signatures')
-                    .select('*')
-                    .order('created_at', { ascending: true });
-
-                if (!error && data) {
-                    renderSignatures(data);
+                if (!supabase) return;
+                try {
+                    const { data, error } = await supabase
+                        .from('signatures')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+                    if (!error && data) renderSignatures(data);
+                } catch (err) {
+                    console.error("Erreur récupération:", err);
                 }
             }
 
-            // Écoute en temps réel
-            supabase
-                .channel('realtime-signatures')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signatures' }, () => {
-                    fetchSignatures();
-                })
-                .subscribe();
+            if (supabase) {
+                fetchSignatures();
+                supabase
+                    .channel('realtime-signatures')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signatures' }, () => {
+                        fetchSignatures();
+                    })
+                    .subscribe();
+            }
 
-            // Bouton Sauvegarder
+            // Validation de signature
             document.getElementById('btn-save').addEventListener('click', async () => {
                 const nameInput = document.getElementById('signer-name').value.trim();
                 if (!nameInput) {
                     alert('Veuillez décliner votre identité avant de ratifier.');
                     return;
                 }
-
-                const blankCanvas = document.createElement('canvas');
-                blankCanvas.width = canvas.width;
-                blankCanvas.height = canvas.height;
-                if (canvas.toDataURL() === blankCanvas.toDataURL()) {
+                if (!hasDrawn) {
                     alert('Veuillez apposer votre signature sur le parchemin.');
                     return;
                 }
@@ -448,25 +444,29 @@
                 const today = new Date().toLocaleDateString('fr-FR');
                 const signatureData = canvas.toDataURL();
 
-                const { error } = await supabase
-                    .from('signatures')
-                    .insert([{ name: nameInput, date: today, img: signatureData }]);
+                if (supabase) {
+                    const { error } = await supabase
+                        .from('signatures')
+                        .insert([{ name: nameInput, date: today, img: signatureData }]);
 
-                btn.disabled = false;
-                btn.innerText = "Ratifier la convention";
+                    btn.disabled = false;
+                    btn.innerText = "Ratifier la convention";
 
-                if (error) {
-                    alert('Erreur lors de la ratification : ' + error.message);
+                    if (error) {
+                        alert('Erreur lors de la ratification : ' + error.message);
+                    } else {
+                        document.getElementById('signer-name').value = '';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        hasDrawn = false;
+                        fetchSignatures();
+                    }
                 } else {
-                    document.getElementById('signer-name').value = '';
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    fetchSignatures();
+                    btn.disabled = false;
+                    btn.innerText = "Ratifier la convention";
+                    alert('Base de données inaccessible.');
                 }
             });
-
-            // Chargement initial
-            fetchSignatures();
-        });
+        })();
     </script>
 </body>
 </html>
