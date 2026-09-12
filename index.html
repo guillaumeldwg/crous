@@ -162,7 +162,7 @@
             background-color: #fff;
             cursor: crosshair;
             margin-bottom: 15px;
-            touch-action: none; /* Empêche le scroll sur mobile en signant */
+            touch-action: none;
         }
 
         button {
@@ -230,7 +230,7 @@
             h1, h3 { border-color: #000; }
             .preambule::first-letter { color: #000; }
             .signatures-box { border-color: #000; }
-            .signature-pad-container { display: none; } /* On cache l'outil de dessin à l'impression */
+            .signature-pad-container { display: none; }
             .signature-item img { filter: none; }
         }
     </style>
@@ -316,8 +316,15 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTION DES SIGNATURES -->
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- SCRIPT DE GESTION DES SIGNATURES AVEC BASE EN LIGNE -->
     <script>
+        const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         document.addEventListener("DOMContentLoaded", function() {
             const canvas = document.getElementById('signature-canvas');
             const ctx = canvas.getContext('2d');
@@ -326,12 +333,12 @@
             // Style de la plume
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
-            ctx.strokeStyle = '#2c1e16'; // Couleur d'encre
+            ctx.strokeStyle = '#2c1e16';
 
             // Adaptation pour le tactile
             function getCoordinates(e) {
                 let rect = canvas.getBoundingClientRect();
-                if(e.touches && e.touches.length > 0) {
+                if (e.touches && e.touches.length > 0) {
                     return {
                         x: e.touches[0].clientX - rect.left,
                         y: e.touches[0].clientY - rect.top
@@ -355,7 +362,7 @@
 
             function draw(e) {
                 if (!isDrawing) return;
-                e.preventDefault(); // Empêche le scrolling sur mobile
+                e.preventDefault();
 
                 let coords = getCoordinates(e);
                 ctx.lineTo(coords.x, coords.y);
@@ -380,9 +387,8 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             });
 
-            // Fonction pour charger et afficher les signatures
-            function loadSignatures() {
-                const sigs = JSON.parse(localStorage.getItem('convention_signatures') || '[]');
+            // Affichage dans le parchemin
+            function renderSignatures(sigs) {
                 const container = document.getElementById('saved-signatures');
                 container.innerHTML = '';
                 
@@ -391,7 +397,7 @@
                     div.className = 'signature-item';
                     div.innerHTML = `
                         <span class="signature-name">${sig.name}</span>
-                        <span class="signature-mention">"Lu et approuvé"</span>
+                        <span class="signature-mention">"Lu et approuvé, je me lèverai sans mâcher"</span>
                         <img src="${sig.img}" alt="Sceau de ${sig.name}">
                         <span class="signature-date">Ratifié le ${sig.date}</span>
                     `;
@@ -399,15 +405,34 @@
                 });
             }
 
+            // Récupération initiale depuis Supabase
+            async function fetchSignatures() {
+                const { data, error } = await supabase
+                    .from('signatures')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (!error && data) {
+                    renderSignatures(data);
+                }
+            }
+
+            // Écoute en temps réel
+            supabase
+                .channel('realtime-signatures')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signatures' }, () => {
+                    fetchSignatures();
+                })
+                .subscribe();
+
             // Bouton Sauvegarder
-            document.getElementById('btn-save').addEventListener('click', () => {
+            document.getElementById('btn-save').addEventListener('click', async () => {
                 const nameInput = document.getElementById('signer-name').value.trim();
                 if (!nameInput) {
                     alert('Veuillez décliner votre identité avant de ratifier.');
                     return;
                 }
 
-                // Vérification si le canvas est vide (astuce simple)
                 const blankCanvas = document.createElement('canvas');
                 blankCanvas.width = canvas.width;
                 blankCanvas.height = canvas.height;
@@ -416,27 +441,31 @@
                     return;
                 }
 
-                // Récupération et sauvegarde
-                const sigs = JSON.parse(localStorage.getItem('convention_signatures') || '[]');
-                const today = new Date();
-                
-                sigs.push({
-                    name: nameInput,
-                    date: today.toLocaleDateString('fr-FR'),
-                    img: canvas.toDataURL()
-                });
-                
-                localStorage.setItem('convention_signatures', JSON.stringify(sigs));
-                
-                // Réinitialisation de l'outil
-                document.getElementById('signer-name').value = '';
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                loadSignatures();
+                const btn = document.getElementById('btn-save');
+                btn.disabled = true;
+                btn.innerText = "Sceau en cours...";
+
+                const today = new Date().toLocaleDateString('fr-FR');
+                const signatureData = canvas.toDataURL();
+
+                const { error } = await supabase
+                    .from('signatures')
+                    .insert([{ name: nameInput, date: today, img: signatureData }]);
+
+                btn.disabled = false;
+                btn.innerText = "Ratifier la convention";
+
+                if (error) {
+                    alert('Erreur lors de la ratification : ' + error.message);
+                } else {
+                    document.getElementById('signer-name').value = '';
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    fetchSignatures();
+                }
             });
 
             // Chargement initial
-            loadSignatures();
+            fetchSignatures();
         });
     </script>
 </body>
