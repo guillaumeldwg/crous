@@ -3,494 +3,742 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Convention du Gobelet et du Hasard</title>
+    <title>Roulette du Crous - Casino Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #0d0d12;
+            --gold: #FFD700;
+            --gold-glow: rgba(255, 215, 0, 0.6);
+            --red-casino: #d32f2f;
+            --black-casino: #1a1a1a;
+            --neon-blue: #00f3ff;
+            --neon-purple: #9d00ff;
+        }
+
         * {
             box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #2b2b2b;
-            padding: 20px 10px;
+            background-color: var(--bg-color);
+            color: #fff;
             margin: 0;
+            padding: 20px 10px;
             display: flex;
-            justify-content: center;
-        }
-
-        .parchemin {
-            background-color: #f4ecd8;
-            background-image: 
-                radial-gradient(circle at 10% 20%, #fdf8eb 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, #fdf8eb 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #f0e4c8 0%, #e6d5b8 100%);
-            width: 100%;
-            max-width: 850px;
-            padding: clamp(25px, 5vw, 70px) clamp(15px, 4vw, 80px);
-            box-shadow: 0px 15px 35px rgba(0,0,0,0.6), inset 0px 0px 40px rgba(139, 69, 19, 0.15);
-            border: double 6px #5c4033;
-            color: #2c1e16;
-            font-family: "Garamond", "Baskerville", "Times New Roman", serif;
-            line-height: 1.6;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         h1 {
             text-align: center;
-            font-size: clamp(1.4em, 4vw, 2.2em);
+            font-size: clamp(1.5em, 5vw, 2.5em);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #5c4033;
-            padding-bottom: 12px;
-            margin-bottom: 30px;
-            font-weight: normal;
+            font-weight: 900;
+            margin: 10px 0 20px 0;
+            color: #fff;
+            text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-glow);
         }
 
-        h2 {
-            text-align: center;
-            font-size: clamp(1.1em, 3vw, 1.4em);
-            text-transform: uppercase;
-            margin-top: 35px;
-            font-style: italic;
-            font-weight: normal;
-        }
-
-        h3 {
-            font-size: clamp(1.05em, 2.5vw, 1.2em);
-            margin-top: 35px;
-            margin-bottom: 12px;
-            font-weight: bold;
-            border-bottom: 1px dashed #a89078;
-            padding-bottom: 4px;
-        }
-
-        p, li {
-            text-align: justify;
-            font-size: clamp(10pt, 2vw, 12pt);
-        }
-
-        .preambule {
-            margin-bottom: 35px;
-            padding: 0 5px;
-        }
-
-        .preambule::first-letter {
-            font-size: 3em;
-            float: left;
-            margin-right: 8px;
-            margin-top: -5px;
-            line-height: 1;
-            font-weight: bold;
-            color: #5c4033;
-        }
-
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        li {
-            margin-bottom: 12px;
-            padding-left: 15px;
-            text-indent: -15px;
-        }
-
-        .clause-num {
-            font-weight: bold;
-            font-style: italic;
-        }
-
-        .signature-section {
-            margin-top: 50px;
-        }
-
-        .lieu-date {
-            text-align: right;
-            margin-top: 25px;
-            margin-bottom: 30px;
-            font-style: italic;
-            font-size: clamp(10pt, 2vw, 12pt);
-        }
-
-        .signatures-box {
-            border: 1px solid #5c4033;
-            padding: 15px;
-            min-height: 200px;
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .sig-titre {
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            display: block;
-            text-align: center;
-            font-size: clamp(0.95em, 2.5vw, 1.1em);
-        }
-
-        .signature-pad-container {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px dashed #a89078;
-            padding: 15px;
-            background: rgba(253, 248, 235, 0.5);
+        .participants-section, .leaderboard-section {
             width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
-        
-        .signature-controls {
+
+        .section-title {
+            color: var(--gold);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .add-guest {
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 12px;
-            width: 100%;
-            justify-content: center;
         }
 
-        input[type="text"] {
-            padding: 10px;
-            font-family: "Garamond", "Times New Roman", serif;
-            font-size: 11pt;
-            border: 1px solid #5c4033;
-            background: #fff;
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-            border-radius: 2px;
+        .add-guest input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
+            background: #111;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
         }
 
-        .canvas-wrapper {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            justify-content: center;
+        .add-guest input:focus {
+            box-shadow: 0 0 10px var(--gold-glow);
         }
 
-        #signature-canvas {
-            border: 1px solid #5c4033;
-            background-color: #fff;
-            cursor: crosshair;
-            margin-bottom: 12px;
-            touch-action: none;
-            display: block;
-            width: 100%;
-            max-width: 400px;
-            height: 150px;
-        }
-
-        button {
-            padding: 10px 15px;
-            background-color: #5c4033;
-            color: #f4ecd8;
-            border: 1px solid #2c1e16;
-            cursor: pointer;
-            font-family: "Garamond", "Times New Roman", serif;
-            font-size: 10pt;
+        .add-guest button {
+            background: linear-gradient(45deg, var(--gold), #ffaa00);
+            border: none;
+            color: #000;
             font-weight: bold;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
             text-transform: uppercase;
-            transition: background-color 0.2s;
-            flex: 1 1 140px;
-            max-width: 200px;
         }
 
-        button:hover { background-color: #2c1e16; }
-        
-        #btn-clear { background-color: transparent; color: #5c4033; }
-        #btn-clear:hover { background-color: rgba(92, 64, 51, 0.1); }
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
 
-        .saved-signatures {
+        .reset-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: var(--gold);
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .players-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 30px;
-            justify-content: center;
+            gap: 8px;
         }
 
-        .signature-item {
+        .player-badge {
+            background: var(--red-casino);
+            padding: 6px 10px 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            border-bottom: 1px solid #a89078;
-            padding-bottom: 10px;
-            width: 140px;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
-        .signature-item img {
-            max-width: 120px;
-            height: auto;
-            margin: 8px 0;
-            filter: sepia(100%) hue-rotate(330deg) saturate(80%) contrast(150%);
+        .player-badge.founder {
+            background: var(--black-casino);
+            border: 1px solid var(--gold);
+            color: var(--gold);
         }
 
-        .signature-name {
+        .score-pill {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.85em;
+            color: var(--gold);
+        }
+
+        .remove-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin: 0 auto 30px auto;
+        }
+
+        #wheel-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), 
+                        inset 0 0 20px rgba(0,0,0,0.8);
+            border: 4px solid var(--gold);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 36px solid #fff;
+            z-index: 10;
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.8)) drop-shadow(0 0 10px var(--gold));
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, var(--red-casino), #8B0000);
+            color: white;
+            font-size: 1.4em;
+            font-weight: 900;
+            padding: 14px 36px;
+            border: 2px solid var(--gold);
+            border-radius: 30px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(211, 47, 47, 0.6);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .spin-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        
+        .spin-btn:disabled {
+            background: #555;
+            border-color: #777;
+            color: #aaa;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Classement */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .leaderboard-table th {
+            color: var(--gold);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-table tr:not(:last-child) td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-table td.count {
+            text-align: right;
             font-weight: bold;
-            font-size: 1em;
+            color: var(--gold);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--black-casino);
+            border: 2px solid var(--gold);
+            padding: 35px 20px;
+            border-radius: 20px;
             text-align: center;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.4);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            color: var(--gold);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .modal-winner {
+            font-size: 2em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-blue);
             word-break: break-word;
         }
 
-        .signature-date {
-            font-size: 0.8em;
+        .modal-desc {
+            font-size: 0.85em;
+            color: #bbb;
+            margin-bottom: 25px;
             font-style: italic;
         }
-        
-        .signature-mention {
-            font-size: 0.65em;
-            text-align: center;
-            color: #555;
-            line-height: 1.2;
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
 
-        @media print {
-            body { background-color: white; padding: 0; }
-            .parchemin { box-shadow: none; border: double 6px #000; background: white; color: black; padding: 30px; }
-            h1, h3 { border-color: #000; }
-            .preambule::first-letter { color: #000; }
-            .signatures-box { border-color: #000; }
-            .signature-pad-container { display: none; }
-            .signature-item img { filter: none; }
+        .modal-btn {
+            background: var(--gold);
+            color: #000;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            cursor: pointer;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            border: 1px solid #777;
+            color: #aaa;
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .charte-link {
+            color: var(--gold);
+            text-decoration: none;
+            margin-top: 25px;
+            margin-bottom: 40px;
+            font-size: 0.85em;
+            opacity: 0.8;
+            border-bottom: 1px dashed var(--gold);
         }
     </style>
 </head>
 <body>
 
-    <div class="parchemin">
-        <h1>Convention Multilatérale<br>dite « Roulette du Crous »</h1>
+    <h1>Roulette du Crous</h1>
 
-        <h2>Préambule</h2>
-        <p class="preambule">
-            Considérant que l'hydratation est un droit fondamental et que l'effort de se lever pour aller au point d'eau doit être équitablement réparti par la grâce de l'algorithme, les Parties conviennent des dispositions suivantes :
-        </p>
+    <div class="participants-section">
+        <div class="section-title">Membres autour de la table</div>
+        <div class="add-guest">
+            <input type="text" id="player-input" placeholder="Ajouter un joueur..." autocomplete="off">
+            <button id="add-btn">+</button>
+        </div>
+        <div class="toolbar">
+            <button class="reset-btn" id="reset-founders-btn">Rétablir fondateurs</button>
+        </div>
+        <div class="players-list" id="players-container"></div>
+    </div>
 
-        <h3>Article I : Le Déclenchement d’Urgence Hydrique</h3>
-        <ul>
-            <li><span class="clause-num">1.1. Invocabilité immédiate :</span> Dès lors qu’un membre de la table manifeste le moindre symptôme de soif ou prononce une formule équivalente à un besoin de ravitaillement, l’état d’urgence est déclaré.</li>
-            <li><span class="clause-num">1.2. Automatisme du tirage :</span> L’activation de la roulette en ligne est de droit et ne peut souffrir d’aucun débat préalable. L’instance de tirage doit être lancée dans les trente secondes suivant la déclaration.</li>
-            <li><span class="clause-num">1.3. Neutralité de la plateforme et probité de l'organisateur :</span> L’écran affichant la roulette doit être orienté de manière à être visible par l’ensemble des membres de la table pour prévenir toute tentative de perfidie ou de manipulation logicielle. De surcroît, depuis la fameuse <strong>« jurisprudence Guillom »</strong>, l'organisateur en charge du lancement est tenu d'attester sur son honneur que le paramétrage de l'outil ne présente aucune pondération altérée ni le moindre avantage, de quelque façon que ce soit, en sa faveur. Tout manquement à ce serment est réputé constituer une tentative de fraude majeure.</li>
-        </ul>
+    <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheel-canvas"></canvas>
+    </div>
 
-        <h3>Article II : L’Exécution Immédiate et la Règle du Plat Suspendu</h3>
-        <ul>
-            <li><span class="clause-num">2.1. Départ instantané :</span> Dès l’arrêt définitif du curseur sur son nom, le Désigné (ci-après <em>« le Porteur »</em>) est tenu de se lever <strong>sur-le-champ</strong>.</li>
-            <li><span class="clause-num">2.2. Suspension des activités nutritives :</span> Depuis l'arrêt rendu par la table et connu sous le nom de <strong>« jurisprudence Lornezo6 »</strong>, il est formellement interdit de « finir sa bouchée », de « terminer sa fourchette » ou de « couper son dernier morceau ». Le repas s’arrête net à la milliseconde où la roulette s'immobilise. Tout couvert doit être posé sans délai.</li>
-            <li><span class="clause-num">2.3. Nullité des échappatoires :</span> Les motifs tels que <em>« attendez je finis mon message »</em>, <em>« laissez-moi avaler »</em> ou <em>« le plat va refroidir »</em> sont réputés nuls et non avenus.</li>
-        </ul>
+    <button class="spin-btn" id="spin-btn">Lancer la roue</button>
 
-        <h3>Article III : Statut des Tiers et Égalité Souveraine (<em>Lex Hospitis</em>)</h3>
-        <ul>
-            <li><span class="clause-num">3.1. Assimilation immédiate des invités :</span> Tout individu extérieur s’asseyant à la table, fût-ce pour une durée temporaire ou pour un simple échange informel, se voit conférer d'office le statut d'« Invité Assujetti ».</li>
-            <li><span class="clause-num">3.2. Principe d'égalité absolue :</span> L’Invité est inscrit sur la roulette au même titre que les Membres Fondateurs. Aucune faveur, période d'essai ou immunité d'accueil n'est accordée.</li>
-            <li><span class="clause-num">3.3. Intégrité des probabilités :</span> Les Membres Originels ne sauraient en aucun cas bénéficier d'une pondération réduite sous prétexte de leur ancienneté ou de l'arrivée d'un tiers. Chaque patronyme présent autour de la table dispose d'une fraction strictement égale de la roue.</li>
-        </ul>
+    <!-- Tableau récapitulatif des corvées -->
+    <div class="leaderboard-section" style="margin-top: 35px;">
+        <div class="section-title">Palmarès officiel des corvées</div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Porteur d'eau</th>
+                    <th style="text-align: right;">Voyages</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr><td colspan="2" style="text-align: center; color: #777;">Chargement des scores...</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-        <h3>Article IV : Les Arrêtés d'Exception (Événements Critiques à 5 %)</h3>
-        <p>La roulette est pourvue de deux clauses d'exception, chacune possédant une probabilité d'occurrence fixée à 5 %, dérogeant de facto aux règles du tirage classique :</p>
-        <ul>
-            <li><span class="clause-num">4.1. La Malédiction de l'Instigateur :</span> Si la roue désigne cette case, l'individu ayant initié l'état d'urgence (cf. Article 1.1) est automatiquement condamné à effectuer le ravitaillement. Cette peine sanctionne pénalement l'insolence d'avoir osé déranger le destin.</li>
-            <li><span class="clause-num">4.2. Le Fait du Prince :</span> Si la roue désigne cette case, le membre ayant accompli la corvée lors du <strong>tour précédent</strong> se voit octroyer les pleins pouvoirs. Il lui incombe de désigner lui-même le nouveau Porteur, au doigt mouillé et de manière totalement arbitraire, sans qu'aucune justification ou appel ne soit recevable.</li>
-        </ul>
+    <a href="index.html" class="charte-link">Consulter la Convention (Charte)</a>
 
-        <h3>Article V : L’Office du Ravitaillement et Proscription de l'Égoïsme</h3>
-        <ul>
-            <li><span class="clause-num">5.1. Collecte exhaustive :</span> Le Porteur est chargé de collecter l’ensemble des verres, gourdes ou récipients de la table, y compris ceux des Invités Assujettis, sans distinction ni plainte.</li>
-            <li><span class="clause-num">5.2. Interdiction du ravitaillement solitaire :</span> Il est formellement proscrit au Porteur de ne remplir que son propre contenant ou d'omettre délibérément le verre d'un tiers. Tout déplacement au point d'eau doit obligatoirement aboutir au remplissage de <strong>l'intégralité</strong> des verres présents.</li>
-            <li><span class="clause-num">5.3. Qualité du service :</span> La cargaison doit être transportée avec diligence, sans renversement, et restituée pleine à chaque propriétaire respectif.</li>
-            <li><span class="clause-num">5.4. Droit de reprise alimentaire :</span> Le Porteur ne recouvre le droit d'ingérer de la nourriture qu'une fois la mission validée par ses pairs.</li>
-        </ul>
-
-        <h3>Article VI : Sanctions et Voies de Fait</h3>
-        <ul>
-            <li><span class="clause-num">6.1. Délit de temporisation :</span> Tout retard délibéré à l'exécution de l'Article II entraîne l'inscription du nom du contrevenant en <strong>double exemplaire</strong> lors du tirage suivant.</li>
-            <li><span class="clause-num">6.2. Délit d'individualisme :</span> L'infraction à l'alinéa 5.2 (remplissage exclusif de son propre verre) entraîne l'annulation du voyage : le Porteur est renvoyé sur-le-champ pour accomplir la corvée complète, assorti d'une amende de corvée automatique au repas suivant.</li>
-            <li><span class="clause-num">6.3. Haute trahison :</span> Le refus pur et simple d'obtempérer est passible de bannissement temporaire du groupe de table et de corvée d'eau obligatoire pour les trois sessions suivantes.</li>
-        </ul>
-
-        <div class="signature-section">
-            <h3>Article VII : Ratification et Sceau</h3>
-            <p>En apposant leur seing au bas de ce document, les Parties renoncent expressément à toute réclamation, admettent la roulette comme seule juridiction compétente et jurent fidélité éternelle à la cause du verre plein.</p>
-            
-            <p class="lieu-date">Fait à Montpellier, en l'an de grâce 2026</p>
-
-            <div class="signatures-box">
-                <span class="sig-titre">Espace réservé aux Signatures et Paraphes</span>
-                
-                <div class="signature-pad-container">
-                    <div class="signature-controls">
-                        <input type="text" id="signer-name" placeholder="Inscrivez votre Nom / Prénom" autocomplete="off">
-                    </div>
-                    <span style="font-style: italic; font-size: 10pt; margin-bottom: 8px; text-align: center;">Apposez votre signature ci-dessous (souris ou doigt) :</span>
-                    
-                    <div class="canvas-wrapper">
-                        <canvas id="signature-canvas"></canvas>
-                    </div>
-
-                    <div class="signature-controls">
-                        <button type="button" id="btn-clear">Effacer</button>
-                        <button type="button" id="btn-save">Ratifier</button>
-                    </div>
-                </div>
-
-                <div class="saved-signatures" id="saved-signatures"></div>
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-subtitle">Le destin a désigné :</div>
+            <div class="modal-winner" id="modal-winner-name">NOM</div>
+            <div class="modal-desc" id="modal-desc">Confirmez pour incrémenter le compteur officiel.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="cancel-modal-btn">Annuler</button>
+                <button class="modal-btn" id="validate-modal-btn">Valider la corvée</button>
             </div>
         </div>
     </div>
 
-    <!-- Script CDN Supabase -->
+    <!-- CDN Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        (function() {
-            const canvas = document.getElementById('signature-canvas');
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false;
-            let hasDrawn = false;
+        const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-            // Redimensionnement interne du canvas selon sa taille réelle affichée
-            function resizeCanvas() {
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.strokeStyle = '#2c1e16';
-            }
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
+        const DEFAULT_FOUNDERS = ["Dr Pepper", "Lornezo6", "Mickael Jean", "Guilllom"];
+        let players = [...DEFAULT_FOUNDERS];
+        let globalScores = {};
+        let currentWinnerSegment = null;
 
-            function getPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
-            }
+        const canvas = document.getElementById('wheel-canvas');
+        const ctx = canvas.getContext('2d');
+        let segments = [];
+        let currentRotation = 0;
+        let isSpinning = false;
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTick() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.04);
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
 
-            function startDraw(e) {
-                isDrawing = true;
-                hasDrawn = true;
-                const pos = getPos(e);
-                ctx.beginPath();
-                ctx.moveTo(pos.x, pos.y);
-                if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
-            }
+        function playWinSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.2);
+        }
 
-            function moveDraw(e) {
-                if (!isDrawing) return;
-                const pos = getPos(e);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-                if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
-            }
+        // --- GESTION SUPABASE (SCORES) ---
+        async function fetchScores() {
+            if (!supabase) return;
+            const { data, error } = await supabase
+                .from('scores')
+                .select('*')
+                .order('count', { ascending: false });
 
-            function stopDraw() {
-                isDrawing = false;
-            }
-
-            canvas.addEventListener('mousedown', startDraw);
-            window.addEventListener('mousemove', moveDraw);
-            window.addEventListener('mouseup', stopDraw);
-
-            canvas.addEventListener('touchstart', startDraw, { passive: false });
-            canvas.addEventListener('touchmove', moveDraw, { passive: false });
-            window.addEventListener('touchend', stopDraw);
-
-            document.getElementById('btn-clear').addEventListener('click', () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                hasDrawn = false;
-            });
-
-            // Base Supabase
-            const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
-            const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
-            let supabase = null;
-
-            if (window.supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-
-            function renderSignatures(sigs) {
-                const container = document.getElementById('saved-signatures');
-                container.innerHTML = '';
-                sigs.forEach(sig => {
-                    const div = document.createElement('div');
-                    div.className = 'signature-item';
-                    div.innerHTML = `
-                        <span class="signature-name">${sig.name}</span>
-                        <span class="signature-mention">"Lu et approuvé, je me lèverai sans mâcher"</span>
-                        <img src="${sig.img}" alt="Sceau de ${sig.name}">
-                        <span class="signature-date">Ratifié le ${sig.date}</span>
-                    `;
-                    container.appendChild(div);
+            if (!error && data) {
+                globalScores = {};
+                data.forEach(row => {
+                    globalScores[row.player_name] = row.count;
                 });
+                renderPlayers();
+                renderLeaderboard(data);
             }
+        }
 
-            async function fetchSignatures() {
-                if (!supabase) return;
-                try {
-                    const { data, error } = await supabase
-                        .from('signatures')
-                        .select('*')
-                        .order('created_at', { ascending: true });
-                    if (!error && data) renderSignatures(data);
-                } catch (err) {
-                    console.error("Erreur récupération:", err);
-                }
+        function renderLeaderboard(data) {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #777;">Aucune corvée enregistrée.</td></tr>';
+                return;
             }
-
-            if (supabase) {
-                fetchSignatures();
-                supabase
-                    .channel('realtime-signatures')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signatures' }, () => {
-                        fetchSignatures();
-                    })
-                    .subscribe();
-            }
-
-            document.getElementById('btn-save').addEventListener('click', async () => {
-                const nameInput = document.getElementById('signer-name').value.trim();
-                if (!nameInput) {
-                    alert('Veuillez décliner votre identité avant de ratifier.');
-                    return;
-                }
-                if (!hasDrawn) {
-                    alert('Veuillez apposer votre signature sur le parchemin.');
-                    return;
-                }
-
-                const btn = document.getElementById('btn-save');
-                btn.disabled = true;
-                btn.innerText = "Sceau...";
-
-                const today = new Date().toLocaleDateString('fr-FR');
-                const signatureData = canvas.toDataURL();
-
-                if (supabase) {
-                    const { error } = await supabase
-                        .from('signatures')
-                        .insert([{ name: nameInput, date: today, img: signatureData }]);
-
-                    btn.disabled = false;
-                    btn.innerText = "Ratifier";
-
-                    if (error) {
-                        alert('Erreur lors de la ratification : ' + error.message);
-                    } else {
-                        document.getElementById('signer-name').value = '';
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        hasDrawn = false;
-                        fetchSignatures();
-                    }
-                } else {
-                    btn.disabled = false;
-                    btn.innerText = "Ratifier";
-                    alert('Base de données inaccessible.');
-                }
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.player_name}</td>
+                    <td class="count">${row.count}</td>
+                `;
+                tbody.appendChild(tr);
             });
-        })();
+        }
+
+        if (supabase) {
+            fetchScores();
+            supabase
+                .channel('realtime-scores')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, () => {
+                    fetchScores();
+                })
+                .subscribe();
+        }
+
+        function renderPlayers() {
+            const container = document.getElementById('players-container');
+            container.innerHTML = '';
+            
+            players.forEach((name, index) => {
+                const isFounder = DEFAULT_FOUNDERS.includes(name);
+                const score = globalScores[name] !== undefined ? globalScores[name] : 0;
+                const el = document.createElement('div');
+                el.className = `player-badge ${isFounder ? 'founder' : ''}`;
+                el.innerHTML = `
+                    <span>${isFounder ? '★ ' : ''}${name}</span>
+                    <span class="score-pill">${score}</span>
+                    <button class="remove-btn" onclick="removePlayer(${index})">×</button>
+                `;
+                container.appendChild(el);
+            });
+
+            document.getElementById('spin-btn').disabled = players.length === 0;
+            buildWheel();
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('player-input');
+            const name = input.value.trim();
+            if (name && !players.includes(name)) {
+                players.push(name);
+                input.value = '';
+                renderPlayers();
+            }
+        }
+
+        document.getElementById('add-btn').addEventListener('click', addPlayer);
+        document.getElementById('player-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') addPlayer();
+        });
+
+        window.removePlayer = function(index) {
+            players.splice(index, 1);
+            renderPlayers();
+        };
+
+        document.getElementById('reset-founders-btn').addEventListener('click', () => {
+            DEFAULT_FOUNDERS.forEach(founder => {
+                if (!players.includes(founder)) players.push(founder);
+            });
+            renderPlayers();
+        });
+
+        function buildWheel() {
+            segments = [];
+            const size = 600;
+            canvas.width = size;
+            canvas.height = size;
+
+            if (players.length === 0) {
+                ctx.clearRect(0, 0, size, size);
+                return;
+            }
+
+            segments.push({ text: "L'INSTIGATEUR", isSpecial: true, weight: 0.05, color: "#00f3ff" });
+            segments.push({ text: "FAIT DU PRINCE", isSpecial: true, weight: 0.05, color: "#9d00ff" });
+            
+            const playerWeight = 0.90 / players.length;
+            players.forEach((player, i) => {
+                const color = (i % 2 === 0) ? "#d32f2f" : "#1a1a1a";
+                segments.push({ text: player, isSpecial: false, weight: playerWeight, color: color });
+            });
+
+            let currentAngle = 0;
+            segments.forEach(seg => {
+                seg.startAngle = currentAngle;
+                seg.endAngle = currentAngle + (seg.weight * 2 * Math.PI);
+                currentAngle = seg.endAngle;
+            });
+
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const size = canvas.width;
+            const cx = size / 2;
+            const cy = size / 2;
+            const radius = size / 2 - 10;
+
+            ctx.clearRect(0, 0, size, size);
+            if (segments.length === 0) return;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(currentRotation);
+
+            segments.forEach(seg => {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, seg.startAngle, seg.endAngle);
+                ctx.closePath();
+                
+                ctx.fillStyle = seg.color;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#FFD700";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.fillStyle = "#FFF";
+                ctx.font = seg.isSpecial ? "bold 19px Montserrat" : "bold 25px Montserrat";
+                
+                const middleAngle = seg.startAngle + (seg.endAngle - seg.startAngle) / 2;
+                ctx.rotate(middleAngle);
+                
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = "rgba(0,0,0,0.8)";
+                ctx.shadowBlur = 4;
+                
+                ctx.fillText(seg.text.toUpperCase(), radius - 18, 0);
+                ctx.restore();
+            });
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#1a1a1a";
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#FFD700";
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        let spinVelocity = 0;
+        let lastSegmentIndex = -1;
+
+        function animateSpin() {
+            if (spinVelocity > 0.001) {
+                currentRotation += spinVelocity;
+                spinVelocity *= 0.985;
+
+                const normalizedRotation = currentRotation % (2 * Math.PI);
+                let pointerAngle = (3 * Math.PI / 2) - normalizedRotation;
+                if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
+
+                let currentIndex = segments.findIndex(seg => pointerAngle >= seg.startAngle && pointerAngle < seg.endAngle);
+                
+                if (currentIndex !== -1 && currentIndex !== lastSegmentIndex) {
+                    playTick();
+                    lastSegmentIndex = currentIndex;
+                }
+
+                drawWheel();
+                requestAnimationFrame(animateSpin);
+            } else {
+                isSpinning = false;
+                document.getElementById('spin-btn').disabled = false;
+                resolveWinner();
+            }
+        }
+
+        function resolveWinner() {
+            const normalizedRotation = currentRotation % (2 * Math.PI);
+            let pointerAngle = (3 * Math.PI / 2) - normalizedRotation;
+            if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
+
+            currentWinnerSegment = segments.find(seg => pointerAngle >= seg.startAngle && pointerAngle < seg.endAngle);
+            if (!currentWinnerSegment) return;
+
+            playWinSound();
+            
+            const modal = document.getElementById('result-modal');
+            const winnerText = document.getElementById('modal-winner-name');
+            const subTitle = document.getElementById('modal-subtitle');
+            const desc = document.getElementById('modal-desc');
+
+            if(currentWinnerSegment.isSpecial) {
+                subTitle.innerText = "Arrêté d'exception (5%) :";
+                winnerText.style.color = "#9d00ff";
+                desc.innerText = "Clause spéciale : aucune attribution directe de point.";
+            } else {
+                subTitle.innerText = "La corvée d'eau est attribuée à :";
+                winnerText.style.color = "#FFF";
+                desc.innerText = "Confirmez pour ajouter +1 au compteur de ce joueur.";
+            }
+
+            winnerText.innerText = currentWinnerSegment.text;
+            modal.classList.add('active');
+        }
+
+        document.getElementById('spin-btn').addEventListener('click', () => {
+            if (isSpinning || players.length === 0) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            isSpinning = true;
+            document.getElementById('spin-btn').disabled = true;
+            spinVelocity = 0.5 + Math.random() * 0.2;
+            requestAnimationFrame(animateSpin);
+        });
+
+        // Validation du résultat et incrémentation Supabase
+        document.getElementById('validate-modal-btn').addEventListener('click', async () => {
+            if (!currentWinnerSegment) return;
+            const btn = document.getElementById('validate-modal-btn');
+            btn.disabled = true;
+            btn.innerText = "Enregistrement...";
+
+            if (!currentWinnerSegment.isSpecial && supabase) {
+                const playerName = currentWinnerSegment.text;
+                const currentCount = globalScores[playerName] || 0;
+                const newCount = currentCount + 1;
+
+                const { error } = await supabase
+                    .from('scores')
+                    .upsert({ player_name: playerName, count: newCount, updated_at: new Date() });
+
+                if (!error) {
+                    globalScores[playerName] = newCount;
+                    fetchScores();
+                } else {
+                    alert("Erreur lors de l'enregistrement du score : " + error.message);
+                }
+            }
+
+            btn.disabled = false;
+            btn.innerText = "Valider la corvée";
+            document.getElementById('result-modal').classList.remove('active');
+        });
+
+        document.getElementById('cancel-modal-btn').addEventListener('click', () => {
+            document.getElementById('result-modal').classList.remove('active');
+        });
+
+        renderPlayers();
     </script>
 </body>
 </html>
