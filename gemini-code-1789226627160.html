@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Roulette du Crous - Casino Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d12;
+            --gold: #FFD700;
+            --gold-glow: rgba(255, 215, 0, 0.6);
+            --red-casino: #d32f2f;
+            --black-casino: #1a1a1a;
+            --neon-blue: #00f3ff;
+            --neon-purple: #9d00ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: clamp(1.5em, 5vw, 2.5em);
+            text-transform: uppercase;
+            font-weight: 900;
+            margin: 10px 0 20px 0;
+            color: #fff;
+            text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-glow);
+        }
+
+        .participants-section, .leaderboard-section {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            color: var(--gold);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .add-guest {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .add-guest input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
+            background: #111;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .add-guest input:focus {
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .add-guest button {
+            background: linear-gradient(45deg, var(--gold), #ffaa00);
+            border: none;
+            color: #000;
+            font-weight: bold;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: var(--gold);
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-badge {
+            background: var(--red-casino);
+            padding: 6px 10px 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .player-badge.founder {
+            background: var(--black-casino);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .score-pill {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.85em;
+            color: var(--gold);
+        }
+
+        .remove-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin: 0 auto 30px auto;
+        }
+
+        #wheel-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), 
+                        inset 0 0 20px rgba(0,0,0,0.8);
+            border: 4px solid var(--gold);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 36px solid #fff;
+            z-index: 10;
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.8)) drop-shadow(0 0 10px var(--gold));
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, var(--red-casino), #8B0000);
+            color: white;
+            font-size: 1.4em;
+            font-weight: 900;
+            padding: 14px 36px;
+            border: 2px solid var(--gold);
+            border-radius: 30px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(211, 47, 47, 0.6);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .spin-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        
+        .spin-btn:disabled {
+            background: #555;
+            border-color: #777;
+            color: #aaa;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Classement */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .leaderboard-table th {
+            color: var(--gold);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-table tr:not(:last-child) td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-table td.count {
+            text-align: right;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--black-casino);
+            border: 2px solid var(--gold);
+            padding: 35px 20px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.4);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            color: var(--gold);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .modal-winner {
+            font-size: 2em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-blue);
+            word-break: break-word;
+        }
+
+        .modal-desc {
+            font-size: 0.85em;
+            color: #bbb;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            background: var(--gold);
+            color: #000;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            cursor: pointer;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            border: 1px solid #777;
+            color: #aaa;
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .charte-link {
+            color: var(--gold);
+            text-decoration: none;
+            margin-top: 25px;
+            margin-bottom: 40px;
+            font-size: 0.85em;
+            opacity: 0.8;
+            border-bottom: 1px dashed var(--gold);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Roulette du Crous</h1>
+
+    <div class="participants-section">
+        <div class="section-title">Membres autour de la table</div>
+        <div class="add-guest">
+            <input type="text" id="player-input" placeholder="Ajouter un joueur..." autocomplete="off">
+            <button id="add-btn">+</button>
+        </div>
+        <div class="toolbar">
+            <button class="reset-btn" id="reset-founders-btn">Rétablir fondateurs</button>
+        </div>
+        <div class="players-list" id="players-container"></div>
+    </div>
+
+    <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheel-canvas"></canvas>
+    </div>
+
+    <button class="spin-btn" id="spin-btn">Lancer la roue</button>
+
+    <!-- Tableau récapitulatif des corvées -->
+    <div class="leaderboard-section" style="margin-top: 35px;">
+        <div class="section-title">Palmarès officiel des corvées</div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Porteur d'eau</th>
+                    <th style="text-align: right;">Voyages</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr><td colspan="2" style="text-align: center; color: #777;">Chargement des scores...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="index.html" class="charte-link">Consulter la Convention (Charte)</a>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-subtitle">Le destin a désigné :</div>
+            <div class="modal-winner" id="modal-winner-name">NOM</div>
+            <div class="modal-desc" id="modal-desc">Confirmez pour incrémenter le compteur officiel.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="cancel-modal-btn">Annuler</button>
+                <button class="modal-btn" id="validate-modal-btn">Valider la corvée</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://rzwhykgoknemwfkcfute.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_7f3L9-8d_P345Eco8PSvxg_5pkbs7aV";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+        const DEFAULT_FOUNDERS = ["Dr Pepper", "Lornezo6", "Mickael Jean", "Guilllom"];
+        let players = [...DEFAULT_FOUNDERS];
+        let globalScores = {};
+        let currentWinnerSegment = null;
+
+        const canvas = document.getElementById('wheel-canvas');
+        const ctx = canvas.getContext('2d');
+        let segments = [];
+        let currentRotation = 0;
+        let isSpinning = false;
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTick() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.04);
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
+
+        function playWinSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.2);
+        }
+
+        // --- GESTION SUPABASE (SCORES) ---
+        async function fetchScores() {
+            if (!supabase) return;
+            const { data, error } = await supabase
+                .from('scores')
+                .select('*')
+                .order('count', { ascending: false });
+
+            if (!error && data) {
+                globalScores = {};
+                data.forEach(row => {
+                    globalScores[row.player_name] = row.count;
+                });
+                renderPlayers();
+                renderLeaderboard(data);
+            }
+        }
+
+        function renderLeaderboard(data) {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #777;">Aucune corvée enregistrée.</td></tr>';
+                return;
+            }
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.player_name}</td>
+                    <td class="count">${row.count}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        if (supabase) {
+            fetchScores();
+            supabase
+                .channel('realtime-scores')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, () => {
+                    fetchScores();
+                })
+                .subscribe();
+        }
+
+        function renderPlayers() {
+            const container = document.getElementById('players-container');
+            container.innerHTML = '';
+            
+            players.forEach((name, index) => {
+                const isFounder = DEFAULT_FOUNDERS.includes(name);
+                const score = globalScores[name] !== undefined ? globalScores[name] : 0;
+                const el = document.createElement('div');
+                el.className = `player-badge ${isFounder ? 'founder' : ''}`;
+                el.innerHTML = `
+                    <span>${isFounder ? '★ ' : ''}${name}</span>
+                    <span class="score-pill">${score}</span>
+                    <button class="remove-btn" onclick="removePlayer(${index})">×</button>
+                `;
+                container.appendChild(el);
+            });
+
+            document.getElementById('spin-btn').disabled = players.length === 0;
+            buildWheel();
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('player-input');
+            const name = input.value.trim();
+            if (name && !players.includes(name)) {
+                players.push(name);
+                input.value = '';
+                renderPlayers();
+            }
+        }
+
+        document.getElementById('add-btn').addEventListener('click', addPlayer);
+        document.getElementById('player-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') addPlayer();
+        });
+
+        window.removePlayer = function(index) {
+            players.splice(index, 1);
+            renderPlayers();
+        };
+
+        document.getElementById('reset-founders-btn').addEventListener('click', () => {
+            DEFAULT_FOUNDERS.forEach(founder => {
+                if (!players.includes(founder)) players.push(founder);
+            });
+            renderPlayers();
+        });
+
+        function buildWheel() {
+            segments = [];
+            const size = 600;
+            canvas.width = size;
+            canvas.height = size;
+
+            if (players.length === 0) {
+                ctx.clearRect(0, 0, size, size);
+                return;
+            }
+
+            segments.push({ text: "L'INSTIGATEUR", isSpecial: true, weight: 0.05, color: "#00f3ff" });
+            segments.push({ text: "FAIT DU PRINCE", isSpecial: true, weight: 0.05, color: "#9d00ff" });
+            
+            const playerWeight = 0.90 / players.length;
+            players.forEach((player, i) => {
+                const color = (i % 2 === 0) ? "#d32f2f" : "#1a1a1a";
+                segments.push({ text: player, isSpecial: false, weight: playerWeight, color: color });
+            });
+
+            let currentAngle = 0;
+            segments.forEach(seg => {
+                seg.startAngle = currentAngle;
+                seg.endAngle = currentAngle + (seg.weight * 2 * Math.PI);
+                currentAngle = seg.endAngle;
+            });
+
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const size = canvas.width;
+            const cx = size / 2;
+            const cy = size / 2;
+            const radius = size / 2 - 10;
+
+            ctx.clearRect(0, 0, size, size);
+            if (segments.length === 0) return;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(currentRotation);
+
+            segments.forEach(seg => {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, seg.startAngle, seg.endAngle);
+                ctx.closePath();
+                
+                ctx.fillStyle = seg.color;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#FFD700";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.fillStyle = "#FFF";
+                ctx.font = seg.isSpecial ? "bold 19px Montserrat" : "bold 25px Montserrat";
+                
+                const middleAngle = seg.startAngle + (seg.endAngle - seg.startAngle) / 2;
+                ctx.rotate(middleAngle);
+                
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = "rgba(0,0,0,0.8)";
+                ctx.shadowBlur = 4;
+                
+                ctx.fillText(seg.text.toUpperCase(), radius - 18, 0);
+                ctx.restore();
+            });
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#1a1a1a";
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#FFD700";
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        let spinVelocity = 0;
+        let lastSegmentIndex = -1;
+
+        function animateSpin() {
+            if (spinVelocity > 0.001) {
+                currentRotation += spinVelocity;
+                spinVelocity *= 0.985;
+
+                const normalizedRotation = currentRotation % (2 * Math.PI);
+                let pointerAngle = (3 * Math.PI / 2) - normalizedRotation;
+                if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
+
+                let currentIndex = segments.findIndex(seg => pointerAngle >= seg.startAngle && pointerAngle < seg.endAngle);
+                
+                if (currentIndex !== -1 && currentIndex !== lastSegmentIndex) {
+                    playTick();
+                    lastSegmentIndex = currentIndex;
+                }
+
+                drawWheel();
+                requestAnimationFrame(animateSpin);
+            } else {
+                isSpinning = false;
+                document.getElementById('spin-btn').disabled = false;
+                resolveWinner();
+            }
+        }
+
+        function resolveWinner() {
+            const normalizedRotation = currentRotation % (2 * Math.PI);
+            let pointerAngle = (3 * Math.PI / 2) - normalizedRotation;
+            if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
+
+            currentWinnerSegment = segments.find(seg => pointerAngle >= seg.startAngle && pointerAngle < seg.endAngle);
+            if (!currentWinnerSegment) return;
+
+            playWinSound();
+            
+            const modal = document.getElementById('result-modal');
+            const winnerText = document.getElementById('modal-winner-name');
+            const subTitle = document.getElementById('modal-subtitle');
+            const desc = document.getElementById('modal-desc');
+
+            if(currentWinnerSegment.isSpecial) {
+                subTitle.innerText = "Arrêté d'exception (5%) :";
+                winnerText.style.color = "#9d00ff";
+                desc.innerText = "Clause spéciale : aucune attribution directe de point.";
+            } else {
+                subTitle.innerText = "La corvée d'eau est attribuée à :";
+                winnerText.style.color = "#FFF";
+                desc.innerText = "Confirmez pour ajouter +1 au compteur de ce joueur.";
+            }
+
+            winnerText.innerText = currentWinnerSegment.text;
+            modal.classList.add('active');
+        }
+
+        document.getElementById('spin-btn').addEventListener('click', () => {
+            if (isSpinning || players.length === 0) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            isSpinning = true;
+            document.getElementById('spin-btn').disabled = true;
+            spinVelocity = 0.5 + Math.random() * 0.2;
+            requestAnimationFrame(animateSpin);
+        });
+
+        // Validation du résultat et incrémentation Supabase
+        document.getElementById('validate-modal-btn').addEventListener('click', async () => {
+            if (!currentWinnerSegment) return;
+            const btn = document.getElementById('validate-modal-btn');
+            btn.disabled = true;
+            btn.innerText = "Enregistrement...";
+
+            if (!currentWinnerSegment.isSpecial && supabase) {
+                const playerName = currentWinnerSegment.text;
+                const currentCount = globalScores[playerName] || 0;
+                const newCount = currentCount + 1;
+
+                const { error } = await supabase
+                    .from('scores')
+                    .upsert({ player_name: playerName, count: newCount, updated_at: new Date() });
+
+                if (!error) {
+                    globalScores[playerName] = newCount;
+                    fetchScores();
+                } else {
+                    alert("Erreur lors de l'enregistrement du score : " + error.message);
+                }
+            }
+
+            btn.disabled = false;
+            btn.innerText = "Valider la corvée";
+            document.getElementById('result-modal').classList.remove('active');
+        });
+
+        document.getElementById('cancel-modal-btn').addEventListener('click', () => {
+            document.getElementById('result-modal').classList.remove('active');
+        });
+
+        renderPlayers();
+    </script>
+</body>
+</html>
